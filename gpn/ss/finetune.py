@@ -23,17 +23,14 @@ https://huggingface.co/models?filter=fill-mask
 
 from collections.abc import Iterable
 import logging
-import math
 import numpy as np
 import os
 import sys
 from dataclasses import dataclass, field
-from itertools import chain
-import torch
-from typing import Any, Callable, Dict, List, NewType, Optional, Tuple, Union
+from typing import Optional
 
 import datasets
-from datasets import load_dataset, DatasetDict, concatenate_datasets
+from datasets import load_dataset
 
 # import evaluate
 import transformers
@@ -47,16 +44,12 @@ from transformers import (
     HfArgumentParser,
     Trainer,
     TrainingArguments,
-    is_torch_tpu_available,
     set_seed,
 )
 from transformers.trainer_utils import get_last_checkpoint
-from transformers.utils import check_min_version, send_example_telemetry
 from transformers.utils.versions import require_version
 
 import gpn.model
-import numpy as np
-import pandas as pd
 
 
 def standardize(x):
