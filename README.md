@@ -71,7 +71,7 @@ WANDB_PROJECT=your_project torchrun --nproc_per_node=$(echo $CUDA_VISIBLE_DEVICE
     --eval_steps 10000 --logging_steps 10000 --max_steps 120000 --warmup_steps 1000 \
     --learning_rate 1e-3 --lr_scheduler_type constant_with_warmup \
     --run_name your_run --output_dir your_output_dir --model_type GPN \
-    --per_device_train_batch_size 512 --per_device_eval_batch_size 512 --gradient_accumulation_steps 1 --total_batch_size 2048 \ 
+    --per_device_train_batch_size 512 --per_device_eval_batch_size 512 --gradient_accumulation_steps 1 --total_batch_size 2048 \
     --torch_compile \
     --ddp_find_unused_parameters False \
     --bf16 --bf16_full_eval \
