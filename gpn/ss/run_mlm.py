@@ -35,6 +35,7 @@ import torch
 import transformers
 from Bio.Seq import Seq
 from datasets import load_dataset
+from torch.utils.data import DataLoader
 from transformers import (CONFIG_MAPPING, MODEL_FOR_MASKED_LM_MAPPING,
                           AutoConfig, AutoModelForMaskedLM, AutoTokenizer,
                           DataCollatorForLanguageModeling, HfArgumentParser,
@@ -45,6 +46,21 @@ from transformers.utils.versions import require_version
 
 import gpn.model
 
+
+class EvalSingleWorkerTrainer(Trainer):
+    """Use a single worker for *evaluation only*."""
+    def get_eval_dataloader(self, eval_dataset=None):
+        eval_dataset = eval_dataset or self.eval_dataset
+        sampler = self._get_eval_sampler(eval_dataset)
+        return DataLoader(
+            eval_dataset,
+            batch_size=self.args.eval_batch_size,
+            sampler=sampler,
+            num_workers=0,                       # ← limit only here
+            pin_memory=self.args.dataloader_pin_memory,
+            collate_fn=self.data_collator,
+            drop_last=False,
+        )
 
 class DataCollatorForLanguageModelingSimplified(DataCollatorForLanguageModeling):
     # Simplified to skip padding since we'll assume all sequences have the same length
@@ -495,7 +511,7 @@ def main():
     )
 
     # Initialize our Trainer
-    trainer = Trainer(
+    trainer = EvalSingleWorkerTrainer(
         model=model,
         args=training_args,
         train_dataset=train_dataset if training_args.do_train else None,
