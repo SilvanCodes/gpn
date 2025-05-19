@@ -23,35 +23,26 @@ https://huggingface.co/models?filter=fill-mask
 
 import logging
 import math
-import numpy as np
 import os
 import sys
 from dataclasses import dataclass, field
-import torch
 from typing import Any, Dict, List, Optional, Union
 
 import datasets
-from datasets import load_dataset
-
-# import evaluate
+import evaluate
+import numpy as np
+import torch
 import transformers
-from transformers import (
-    CONFIG_MAPPING,
-    MODEL_FOR_MASKED_LM_MAPPING,
-    AutoConfig,
-    AutoModelForMaskedLM,
-    AutoTokenizer,
-    DataCollatorForLanguageModeling,
-    HfArgumentParser,
-    Trainer,
-    TrainingArguments,
-    set_seed,
-)
+from Bio.Seq import Seq
+from datasets import load_dataset
+from transformers import (CONFIG_MAPPING, MODEL_FOR_MASKED_LM_MAPPING,
+                          AutoConfig, AutoModelForMaskedLM, AutoTokenizer,
+                          DataCollatorForLanguageModeling, HfArgumentParser,
+                          Trainer, TrainingArguments, set_seed)
 from transformers.trainer_utils import get_last_checkpoint
 from transformers.utils import send_example_telemetry
 from transformers.utils.versions import require_version
 
-from Bio.Seq import Seq
 import gpn.model
 
 
