@@ -510,6 +510,21 @@ def main():
         mlm_probability=data_args.mlm_probability,
     )
 
+    accuracy_metric   = evaluate.load("accuracy")          # Top-1
+
+    def compute_metrics(eval_preds):
+        logits, labels = eval_preds
+        preds = np.argmax(logits, axis=-1).reshape(-1)
+        labels = labels.reshape(-1)
+        # only keep masked positions
+        mask = labels != -100
+        masked_preds  = preds[mask]
+        masked_labels = labels[mask]
+
+        acc1 = accuracy_metric.compute(predictions=masked_preds, references=masked_labels)["accuracy"]
+
+        return {"acc1": acc1}
+
     # Initialize our Trainer
     trainer = EvalSingleWorkerTrainer(
         model=model,
@@ -518,6 +533,7 @@ def main():
         eval_dataset=eval_dataset if training_args.do_eval else None,
         tokenizer=tokenizer,
         data_collator=data_collator,
+        compute_metrics=compute_metrics,
     )
 
     # Training
