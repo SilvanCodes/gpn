@@ -1,6 +1,5 @@
 from setuptools import setup
 
-
 install_requires = [
     "transformers[torch]",
     "datasets",
@@ -17,6 +16,8 @@ install_requires = [
     "zarr",
     "pyBigWig",
     "joblib",
+    "evaluate",
+    "scikit-learn",
 ]
 
 
