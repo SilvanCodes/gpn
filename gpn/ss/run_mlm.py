@@ -50,17 +50,11 @@ import gpn.model
 class EvalSingleWorkerTrainer(Trainer):
     """Use a single worker for *evaluation only*."""
     def get_eval_dataloader(self, eval_dataset=None):
-        eval_dataset = eval_dataset or self.eval_dataset
-        sampler = self._get_eval_sampler(eval_dataset)
-        return DataLoader(
-            eval_dataset,
-            batch_size=self.args.eval_batch_size,
-            sampler=sampler,
-            num_workers=0,                       # ← limit only here
-            pin_memory=self.args.dataloader_pin_memory,
-            collate_fn=self.data_collator,
-            drop_last=False,
-        )
+        original_workers = self.args.dataloader_num_workers
+        self.args.dataloader_num_workers = 0
+        dataloader = super().get_test_dataloader(eval_dataset)
+        self.args.dataloader_num_workers = original_workers
+        return dataloader
 
 class DataCollatorForLanguageModelingSimplified(DataCollatorForLanguageModeling):
     # Simplified to skip padding since we'll assume all sequences have the same length
