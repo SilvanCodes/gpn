@@ -28,8 +28,6 @@ from transformers.models.roformer.modeling_roformer import (
     RoFormerSinusoidalPositionalEmbedding,
 )
 
-from torch._dynamo import no_compile
-
 
 ENCODER_CLASS = {
     "bytenet": ByteNetEncoder,
@@ -88,7 +86,7 @@ EMBEDDING_CLASS = {
     "embedding": GPNEmbedding2,
 }
 
-@no_compile
+@torch.compiler.disable
 def compute_loss(logits, labels, output_probs, loss_weight, vocab_size):
     loss = None
     if labels is not None and loss_weight is None:
