@@ -88,29 +88,34 @@ EMBEDDING_CLASS = {
 
 
 def compute_loss(logits, labels, output_probs, loss_weight, vocab_size):
-     # put everything on the same dtype/device early
-    logits_dtype = logits.dtype             # bf16 or f32, depending on autocast
-    if loss_weight is not None:
-        loss_weight = loss_weight.to(logits_dtype)
-
     loss = None
     if labels is not None and loss_weight is None:
         loss_fct = CrossEntropyLoss()
         loss = loss_fct(logits.view(-1, vocab_size), labels.view(-1))
     elif labels is not None and loss_weight is not None:
-        loss_fct = CrossEntropyLoss(reduction="none")
-        labels = labels.view(-1)
-        loss = loss_fct(
-            logits.view(-1, vocab_size), labels
-        )  # what if we first exclude the ones with -100??
-        loss_weight = loss_weight.view(-1)
-        loss_weight[labels == -100] = 0.0
+        # 1) loss that ignores -100 automatically
+        loss_fct = torch.nn.CrossEntropyLoss(
+            ignore_index=-100,
+            reduction="none"
+        )
+        # 2) flatten
+        logits_flat = logits.view(-1, vocab_size)
+        labels_flat = labels.view(-1)
+        weights = loss_weight.view(-1).float()
 
-        # keep the math in fp32 for stability, but stay away from fp64
-        loss = loss.float()
-        loss_weight = loss_weight.float()
+        # 3) per-token losses (zeros where label=-100)
+        losses = loss_fct(logits_flat, labels_flat)
 
-        loss = (loss * loss_weight / loss_weight.sum()).sum()
+        # 4) mask out the weights for ignore positions
+        ignore_mask = labels_flat == -100            # [N] bool
+        weights = torch.where(                       # [N] f32
+            ignore_mask,
+            torch.zeros_like(weights),
+            weights
+        )
+
+        # 5) weighted average
+        loss = (losses * weights).sum() / weights.sum()
     elif output_probs is not None:
         loss_fct = CrossEntropyLoss(reduction="none")
         output_probs = output_probs.view(-1, vocab_size)
