@@ -29,7 +29,6 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Union
 
 import datasets
-import evaluate
 import numpy as np
 import torch
 import transformers
@@ -455,20 +454,24 @@ def main():
     remove_columns = list(list(raw_datasets["train"].take(1))[0].keys())
 
     if training_args.do_train:
-        train_dataset = raw_datasets["train"].shuffle(seed=training_args.seed)
-        train_dataset = train_dataset.map(
-            lambda examples: tokenize_function(
-                examples, data_args.soft_masked_loss_weight_train,
-                data_augmentation=True,
-            ),
-            batched=True,
-            remove_columns=remove_columns,
-            # This takes care of some issues when using torch_compile
-            # I think it's a bug in IterableDataset in the datasets library
-            # When the last batch is smaller than the batch size
-            # Hopefully it will be fixed soon
-            drop_last_batch=True,
-            batch_size=data_args.total_batch_size,
+        train_dataset = (
+            raw_datasets["train"]
+            .shuffle(seed=training_args.seed)
+            .map(
+                lambda examples: tokenize_function(
+                    examples, data_args.soft_masked_loss_weight_train,
+                    data_augmentation=True,
+                ),
+                batched=True,
+                remove_columns=remove_columns,
+                # This takes care of some issues when using torch_compile
+                # I think it's a bug in IterableDataset in the datasets library
+                # When the last batch is smaller than the batch size
+                # Hopefully it will be fixed soon
+                drop_last_batch=True,
+                batch_size=data_args.total_batch_size,
+            )
+            .repeat()
         )
 
     if training_args.do_eval:
@@ -494,21 +497,6 @@ def main():
         mlm_probability=data_args.mlm_probability,
     )
 
-    accuracy_metric   = evaluate.load("accuracy")          # Top-1
-
-    # def compute_metrics(eval_preds):
-    #     logits, labels = eval_preds
-    #     preds = np.argmax(logits, axis=-1).reshape(-1)
-    #     labels = labels.reshape(-1)
-    #     # only keep masked positions
-    #     mask = labels != -100
-    #     masked_preds  = preds[mask]
-    #     masked_labels = labels[mask]
-
-    #     acc1 = accuracy_metric.compute(predictions=masked_preds, references=masked_labels)["accuracy"]
-
-    #     return {"acc1": acc1}
-
     # Initialize our Trainer
     trainer = Trainer(
         model=model,
@@ -517,7 +505,6 @@ def main():
         eval_dataset=eval_dataset if training_args.do_eval else None,
         tokenizer=tokenizer,
         data_collator=data_collator,
-        # compute_metrics=compute_metrics,
     )
 
     # Training
