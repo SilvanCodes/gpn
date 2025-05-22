@@ -471,7 +471,7 @@ def main():
                 drop_last_batch=True,
                 batch_size=data_args.total_batch_size,
             )
-            .repeat()
+            .repeat(None)
         )
 
     if training_args.do_eval:
