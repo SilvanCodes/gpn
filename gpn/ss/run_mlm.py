@@ -44,14 +44,6 @@ from transformers.utils.versions import require_version
 
 import gpn.model
 
-from datasets.iterable_dataset import RepeatExamplesIterable
-
-if not hasattr(RepeatExamplesIterable, "num_shards"):
-    # forward the information from the underlying iterable
-    RepeatExamplesIterable.num_shards = property(
-        lambda self: self.ex_iterable.num_shards
-    )
-
 
 class DataCollatorForLanguageModelingSimplified(DataCollatorForLanguageModeling):
     # Simplified to skip padding since we'll assume all sequences have the same length
