@@ -88,6 +88,11 @@ EMBEDDING_CLASS = {
 
 
 def compute_loss(logits, labels, output_probs, loss_weight, vocab_size):
+     # put everything on the same dtype/device early
+    logits_dtype = logits.dtype             # bf16 or f32, depending on autocast
+    if loss_weight is not None:
+        loss_weight = loss_weight.to(logits_dtype)
+
     loss = None
     if labels is not None and loss_weight is None:
         loss_fct = CrossEntropyLoss()
@@ -100,6 +105,11 @@ def compute_loss(logits, labels, output_probs, loss_weight, vocab_size):
         )  # what if we first exclude the ones with -100??
         loss_weight = loss_weight.view(-1)
         loss_weight[labels == -100] = 0.0
+
+        # keep the math in fp32 for stability, but stay away from fp64
+        loss = loss.float()
+        loss_weight = loss_weight.float()
+
         loss = (loss * loss_weight / loss_weight.sum()).sum()
     elif output_probs is not None:
         loss_fct = CrossEntropyLoss(reduction="none")
