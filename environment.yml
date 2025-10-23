@@ -1,0 +1,25 @@
+name: dev_env
+channels:
+  - pytorch
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - pandas
+  - pyarrow
+  - numpy
+  - pytorch
+  - pytorch-cuda
+  - torchinfo
+  - transformers
+  - datasets
+  - evaluate
+  - accelerate
+  - biopython
+  - tqdm
+  - matplotlib
+  - seaborn
+  - pip
+  - wandb
+  - bioframe
+  - zstandard
