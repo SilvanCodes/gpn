@@ -31,7 +31,7 @@ from transformers.models.roformer.modeling_roformer import (
 from transformers.pipelines import PIPELINE_REGISTRY
 from transformers import AutoModelForMaskedLM
 
-from gpn.pipeline.gpn_pipeline import GPNPipeline
+from gpn.pipeline import GPNPipeline
 
 
 ENCODER_CLASS = {
