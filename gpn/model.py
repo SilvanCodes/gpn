@@ -28,6 +28,11 @@ from transformers.models.roformer.modeling_roformer import (
     RoFormerSinusoidalPositionalEmbedding,
 )
 
+from transformers.pipelines import PIPELINE_REGISTRY
+from transformers import AutoModelForMaskedLM
+
+from gpn.pipeline.gpn_pipeline import GPNPipeline
+
 
 ENCODER_CLASS = {
     "bytenet": ByteNetEncoder,
@@ -494,3 +499,11 @@ from .legacy import GPNRoFormerConfig, GPNRoFormerModel, GPNRoFormerForMaskedLM
 AutoConfig.register("GPNRoFormer", GPNRoFormerConfig)
 AutoModel.register(GPNRoFormerConfig, GPNRoFormerModel)
 AutoModelForMaskedLM.register(GPNRoFormerConfig, GPNRoFormerForMaskedLM)
+
+PIPELINE_REGISTRY.register_pipeline(
+    "gpn",
+    pipeline_class=GPNPipeline,
+    pt_model=AutoModelForMaskedLM,
+    default={"pt": ("songlab/gpn-brassicales", "main")},
+    type="text",
+)
