@@ -48,7 +48,7 @@ model = AutoModel.from_pretrained("songlab/PhyloGPN", trust_remote_code=True)
 Can also be called GPN-SS (single sequence).
 
 ### Examples
-* Play with the model: `examples/ss/basic_example.ipynb` [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/songlab-cal/gpn/blob/main/examples/ss/basic_example.ipynb)
+* Play with the model: `examples/ss/basic_example.ipynb` [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/SilvanCodes/gpn/blob/main/examples/ss/basic_example.ipynb)
 
 ### Training on your own data
 1. [Snakemake workflow to create a dataset](workflow/make_dataset)
