@@ -22,14 +22,14 @@ install_requires = [
 
 
 setup(
-    name='gpn',
-    version='0.6',
-    description='gpn',
-    url='http://github.com/songlab-cal/gpn',
-    author='Gonzalo Benegas',
-    author_email='gbenegas@berkeley.edu',
-    license='MIT',
-    packages=['gpn', 'gpn.ss', 'gpn.msa'],
+    name="gpn",
+    version="0.6",
+    description="gpn",
+    url="http://github.com/songlab-cal/gpn",
+    author="Gonzalo Benegas",
+    author_email="gbenegas@berkeley.edu",
+    license="MIT",
+    packages=["gpn", "gpn.ss", "gpn.msa", "gpn.pipelines"],
     zip_safe=False,
     install_requires=install_requires,
 )
