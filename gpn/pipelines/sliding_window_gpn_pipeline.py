@@ -53,7 +53,8 @@ class SlidingWindowGPNPipeline(ChunkPipeline):
         is_last = model_inputs.pop("is_last")
 
         output = self.model(**model_inputs)
-        return {"output": output, "reference": reference, "is_last": is_last}
+        # Return the logits directly for batching and further processing
+        return {"logits": output.logits, "reference": reference, "is_last": is_last}
 
     def postprocess(self, all_model_outputs):
         acgt = np.array(list("acgt"))
@@ -63,7 +64,7 @@ class SlidingWindowGPNPipeline(ChunkPipeline):
         # Collect per-position results
         refs, probs = [], []
         for out in all_model_outputs:
-            logits = out["output"].logits[:, :, acgt_idxs]
+            logits = out["logits"][:, :, acgt_idxs]
             p = torch.softmax(logits, dim=-1).squeeze().cpu().numpy()
             center_p = p[len(p) // 2]  # only the central masked position
             refs.append(out["reference"])
