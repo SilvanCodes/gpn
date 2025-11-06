@@ -1,6 +1,7 @@
 from transformers.pipelines import PIPELINE_REGISTRY
 from transformers import AutoModelForMaskedLM
 
+from gpn.pipelines.ndm_pipeline import NDMPipeline
 from gpn.pipelines.simple_gpn_pipeline import SimpleGPNPipeline
 from gpn.pipelines.sliding_window_gpn_pipeline import SlidingWindowGPNPipeline
 
@@ -17,6 +18,14 @@ PIPELINE_REGISTRY.register_pipeline(
 PIPELINE_REGISTRY.register_pipeline(
     "gpn",
     pipeline_class=SlidingWindowGPNPipeline,
+    pt_model=AutoModelForMaskedLM,
+    default={"pt": DEFAULT_GPN_MODEL},
+    type="text",
+)
+
+PIPELINE_REGISTRY.register_pipeline(
+    "ndm",
+    pipeline_class=NDMPipeline,
     pt_model=AutoModelForMaskedLM,
     default={"pt": DEFAULT_GPN_MODEL},
     type="text",

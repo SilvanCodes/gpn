@@ -49,6 +49,7 @@ class SlidingWindowGPNPipeline(ChunkPipeline):
             model_input = self.tokenizer(
                 window_tokens,
                 return_tensors="pt",
+                is_split_into_words=True,
                 return_attention_mask=False,
                 return_token_type_ids=False,
             )
