@@ -136,3 +136,8 @@ class NDMPipeline(ChunkPipeline):
         np.fill_diagonal(dep_map, 0.0)
 
         return dep_map
+
+    def vis(dep_map):
+        vis = dep_map.sum(axis=1) / (dep_map.shape[1] - 1)
+        vis.name = "VIS"
+        return vis
