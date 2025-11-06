@@ -2,9 +2,21 @@ import torch
 import pandas as pd
 import numpy as np
 from transformers.pipelines.base import ChunkPipeline
+from tqdm.auto import tqdm
 
 
 class SlidingWindowGPNPipeline(ChunkPipeline):
+    def __call__(self, inputs, *args, **kwargs):
+        total_windows = len(inputs)
+
+        self._progress_bar = tqdm(total=total_windows, desc="Processing windows")
+        self._progress_bar_step = kwargs["batch_size"] if "batch_size" in kwargs else 1
+
+        result = super().__call__(inputs, *args, **kwargs)
+
+        self._progress_bar.close()
+        return result
+
     def _sanitize_parameters(self, **kwargs):
         preprocess_params = {}
         if "window_size" in kwargs:
@@ -53,6 +65,7 @@ class SlidingWindowGPNPipeline(ChunkPipeline):
         is_last = model_inputs.pop("is_last")
 
         output = self.model(**model_inputs)
+        self._progress_bar.update(self._progress_bar_step)
         # Return the logits directly for batching and further processing
         return {"logits": output.logits, "reference": reference, "is_last": is_last}
 
