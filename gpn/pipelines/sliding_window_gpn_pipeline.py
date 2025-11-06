@@ -10,7 +10,7 @@ class SlidingWindowGPNPipeline(ChunkPipeline):
         total_windows = len(inputs)
 
         self._progress_bar = tqdm(total=total_windows, desc="Processing windows")
-        self._progress_bar_step = kwargs["batch_size"] if "batch_size" in kwargs else 1
+        self._progress_bar_step = kwargs.get("batch_size", 1)
 
         result = super().__call__(inputs, *args, **kwargs)
 
@@ -48,7 +48,6 @@ class SlidingWindowGPNPipeline(ChunkPipeline):
 
             model_input = self.tokenizer(
                 window_tokens,
-                is_split_into_words=True,
                 return_tensors="pt",
                 return_attention_mask=False,
                 return_token_type_ids=False,
