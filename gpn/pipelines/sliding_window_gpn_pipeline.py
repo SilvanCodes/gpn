@@ -58,20 +58,27 @@ class SlidingWindowGPNPipeline(ChunkPipeline):
         return start, end
 
     def __call__(self, inputs, *args, **kwargs):
-        # Determine region length for the progress bar
-        seq_len = len(inputs)
+        # Normalize inputs to a list of sequences
+        if isinstance(inputs, str):
+            sequences = [inputs]
+        else:
+            sequences = list(inputs)
 
+        # Compute total windows for progress bar
         start = kwargs.get("start", 0)
         end = kwargs.get("end", None)
 
-        start, end = self.verify_range(start, end, seq_len)
-
-        total_windows = end - start
+        total_windows = 0
+        for seq in sequences:
+            seq_len = len(seq)
+            s, e = self.verify_range(start, end, seq_len)
+            total_windows += e - s
 
         self._progress_bar = tqdm(total=total_windows, desc="Processing windows")
         self._progress_bar_step = kwargs.get("batch_size", 1)
 
-        result = super().__call__(inputs, *args, **kwargs)
+        # Call parent on the list of sequences
+        result = super().__call__(sequences, *args, **kwargs)
 
         self._progress_bar.close()
         return result
