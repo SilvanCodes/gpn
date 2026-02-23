@@ -3,6 +3,11 @@ import numpy as np
 from transformers.pipelines.base import ChunkPipeline
 from tqdm.auto import tqdm
 
+from gpn.pipelines.utils import (
+    get_acgt_tokens_and_indices,
+    normalize_sequence_to_vocab_case,
+)
+
 
 class NDMPipeline(ChunkPipeline):
     def __call__(self, inputs, *args, **kwargs):
@@ -27,6 +32,9 @@ class NDMPipeline(ChunkPipeline):
         return {}, {}, {}
 
     def preprocess(self, sequence):
+        sequence = normalize_sequence_to_vocab_case(sequence, self.tokenizer)
+        _, vocab_tokens, _ = get_acgt_tokens_and_indices(self.tokenizer)
+
         buf = bytearray(sequence, "ascii")
         L = len(buf)
 
@@ -34,8 +42,9 @@ class NDMPipeline(ChunkPipeline):
             ref = chr(buf[pos])
             original_byte = buf[pos]
 
-            for idx, alt in enumerate(list("ACGT")):
-                if alt == ref:
+            for idx, alt in enumerate(vocab_tokens):
+                alt = str(alt)
+                if alt.lower() == ref.lower():
                     continue
 
                 # mutate in-place
@@ -87,9 +96,7 @@ class NDMPipeline(ChunkPipeline):
         }
 
     def postprocess(self, all_model_outputs, epsilon=1e-10):
-        acgt = np.array(list("acgt"))
-        vocab = self.tokenizer.get_vocab()
-        acgt_idxs = [vocab[n] for n in acgt]
+        _, _, acgt_idxs = get_acgt_tokens_and_indices(self.tokenizer)
 
         # Collect per-mutation results
         meta, probs = [], []

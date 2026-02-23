@@ -3,12 +3,18 @@ import pandas as pd
 import numpy as np
 from transformers import Pipeline
 
+from gpn.pipelines.utils import (
+    get_acgt_tokens_and_indices,
+    normalize_sequence_to_vocab_case,
+)
+
 
 class SimpleGPNPipeline(Pipeline):
     def _sanitize_parameters(self, **kwargs):
         return {}, {}, {}
 
     def preprocess(self, sequence):
+        sequence = normalize_sequence_to_vocab_case(sequence, self.tokenizer)
         tokens = self.tokenizer(
             sequence,
             return_tensors="pt",
@@ -24,11 +30,9 @@ class SimpleGPNPipeline(Pipeline):
     def postprocess(self, model_outputs):
         seq = model_outputs["seq"]
         logits = model_outputs["output"].logits
-        vocab = self.tokenizer.get_vocab()
-        acgt = np.array(list("acgt"))
+        acgt, _, acgt_idxs = get_acgt_tokens_and_indices(self.tokenizer)
 
         # get logits only for A/C/G/T and convert to probabilities
-        acgt_idxs = [vocab[n] for n in acgt]
         probs = torch.softmax(logits[:, :, acgt_idxs], dim=-1).squeeze().cpu().numpy()
 
         df = pd.DataFrame(probs, columns=[f"p_{n}" for n in acgt])
