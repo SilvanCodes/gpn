@@ -4,6 +4,11 @@ import numpy as np
 from transformers.pipelines.base import ChunkPipeline
 from tqdm.auto import tqdm
 
+from gpn.pipelines.utils import (
+    get_acgt_tokens_and_indices,
+    normalize_sequence_to_vocab_case,
+)
+
 
 class SlidingWindowGPNPipeline(ChunkPipeline):
     """
@@ -100,6 +105,7 @@ class SlidingWindowGPNPipeline(ChunkPipeline):
         Slides a masking window across the sequence and yields tokenized inputs
         with the center position masked, restricted to [start, end).
         """
+        sequence = normalize_sequence_to_vocab_case(sequence, self.tokenizer)
         tokens = list(sequence)
         seq_len = len(tokens)
 
@@ -147,9 +153,7 @@ class SlidingWindowGPNPipeline(ChunkPipeline):
         return {"logits": output.logits, "reference": reference, "is_last": is_last}
 
     def postprocess(self, all_model_outputs):
-        acgt = np.array(list("acgt"))
-        vocab = self.tokenizer.get_vocab()
-        acgt_idxs = [vocab[n] for n in acgt]
+        acgt, _, acgt_idxs = get_acgt_tokens_and_indices(self.tokenizer)
 
         # Collect per-position results
         refs, probs = [], []
