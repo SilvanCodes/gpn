@@ -4,6 +4,8 @@ import numpy as np
 from transformers.pipelines.base import ChunkPipeline
 from tqdm.auto import tqdm
 
+from gpn.pipelines.utils import get_acgt_tokens_and_indices
+
 
 class MSICPipeline(ChunkPipeline):
     """
@@ -147,9 +149,7 @@ class MSICPipeline(ChunkPipeline):
         return {"logits": output.logits, "reference": reference, "is_last": is_last}
 
     def postprocess(self, all_model_outputs):
-        acgt = np.array(list("acgt"))
-        vocab = self.tokenizer.get_vocab()
-        acgt_idxs = [vocab[n] for n in acgt]
+        acgt, _, acgt_idxs = get_acgt_tokens_and_indices(self.tokenizer)
 
         # Collect per-position results
         refs, probs = [], []
