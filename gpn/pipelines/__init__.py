@@ -4,6 +4,7 @@ from transformers import AutoModelForMaskedLM
 from gpn.pipelines.ndm_pipeline import NDMPipeline
 from gpn.pipelines.simple_gpn_pipeline import SimpleGPNPipeline
 from gpn.pipelines.sliding_window_gpn_pipeline import SlidingWindowGPNPipeline
+from gpn.pipelines.msic_pipeline import MSICPipeline
 
 DEFAULT_GPN_MODEL = ("songlab/gpn-brassicales", "main")
 
@@ -23,6 +24,14 @@ PIPELINE_REGISTRY.register_pipeline(
     type="text",
 )
 
+
+PIPELINE_REGISTRY.register_pipeline(
+    "msic",
+    pipeline_class=MSICPipeline,
+    pt_model=AutoModelForMaskedLM,
+    default={"pt": DEFAULT_GPN_MODEL},
+    type="text",
+)
 PIPELINE_REGISTRY.register_pipeline(
     "ndm",
     pipeline_class=NDMPipeline,
